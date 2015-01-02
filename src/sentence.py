@@ -6,4 +6,4 @@ class sentence:
         self.goldheads = goldHeads
         
     def __repr__(self):
-        return " ".join(self.words) 
+        return " ".join(self.words)
