@@ -39,7 +39,6 @@ class uniCPos():
     def val(self,pWord,pPos,cWord,cPos):
         return 1 if self.cPos == cPos else 0;
 
-
 class uniCWordCPos():
     
     def __init__(self,cWord,cPos):
@@ -49,16 +48,16 @@ class uniCWordCPos():
     def val(self,pWord,pPos,cWord,cPos):
         return 1 if ((self.cWord == cWord) and (self.cPos == cPos)) else 0;
 
-class biPWordCWordCPos():
+class biPPosCWordCPos():
     
-    def __init__(self,pWord,cWord,cPos):
-        self.pWord = pWord
+    def __init__(self,pPos,cWord,cPos):
+        self.pPos = pPos
         self.cWord = cWord
         self.cPos = cPos
     
     def val(self,pWord,pPos,cWord,cPos):
         return 1 if ((self.cWord == cWord) and (self.cPos == cPos) and\
-                     (self.pWord == pWord)) else 0;
+                     (self.pPos == pPos)) else 0;
 
 class biPWordPPosCPos():
     
@@ -79,4 +78,3 @@ class biPPosCPos():
     
     def val(self,pWord,pPos,cWord,cPos):
         return 1 if ((self.pPos == pPos) and (self.cPos == cPos)) else 0;
-

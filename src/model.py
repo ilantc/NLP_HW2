@@ -3,7 +3,6 @@ import sentence
 
 class mstModel:
     
-    featureSet = []
     w = []
     featureDict = {'pWord': {}, 'pPos' : {}, 'cWord': {}, 'cPos': {}}
     
@@ -45,9 +44,13 @@ class mstModel:
                 goldHeads.append(fields[6])
         return allSentences
     
-    # TODO - Ilan
-    def buildFeatures(self):
+    # TODO - Liora
+    def buildFeatureMapping(self):
         return
+    
+    # TODO - Liora
+    def calcEdgeWeight(self, w, pWord, pPos, cWord, cPos):
+        return 0
     
     # TODO - Liora
     def train(self):
