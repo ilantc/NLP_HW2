@@ -1,5 +1,6 @@
 import re
 import sentence
+import networkx as nx
 
 class mstModel:
     
@@ -8,6 +9,9 @@ class mstModel:
                    'cWordCPos':{}, 'pPosCWordCPos':{}, 'pPosCPos':{}}
     allSentences = []
     featuresNum = 0 
+    
+    rootSymbol = "__root__"
+    rootPOS = "__rootPos__"
     
     def __init__(self):
         self.featuresNum = 0
@@ -144,9 +148,38 @@ class mstModel:
                     w = w + diffFeatureIndices
         return w
     
+    def initGraph(self,n,w):
+        G = nx.DiGraph()
+        n = len(sentence.words)
+        
+        # add all nodes and edges
+        G.add_nodes_from(range(n + 1)) 
+        
+        # add edges and weights
+        for p in range(0,n + 1):
+            if p == 0:
+                pWord = self.rootSymbol
+                pPos = self.rootPOS
+            else:
+                pWord = sentence.words[p - 1]
+                pWord = sentence.poss[p - 1]
+            for c in range(1,n + 1):
+                if p == c: 
+                    continue
+                cWord = sentence.words[c - 1]
+                cPos = sentence.poss[c - 1]
+                w_e = self.calcEdgeWeight(w, pWord, pPos, cWord, cPos)
+                G.add_edge(p, c, {'weight': w_e})
+        
+        return G
+    
     # TODO - Ilan
     
-    def ciuLiuEdmonds(self):
+    def ciuLiuEdmonds(self, sentence, w):
+        n = len(sentence.words)
+        G = self.initGraph(n,w)
+
+        
         return
     
     # TODO - Ilan
