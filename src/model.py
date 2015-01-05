@@ -10,7 +10,8 @@ class mstModel:
     featuresNum = 0 
     
     def __init__(self):
-        self. featuresNum = 0 
+        self.featuresNum = 0
+        self.w = []
         return
     
     def readFile(self,numSentences,offset = 0,inputFile = "../data/wsj_gold_dependency"):
@@ -77,7 +78,7 @@ class mstModel:
                 if not self.featureDict['pPosCPos'].has_key((sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.poss[wordIndex])):
                     self.featureDict['pPosCPos'][(sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.poss[wordIndex])] = featureIndex    
                     featureIndex += 1               
-        return featureIndex
+        self.featuresNum = featureIndex
     
     def getEdgeFeatureIndices(self,pWord, pPos, cWord, cPos):
         indices = []
@@ -101,19 +102,19 @@ class mstModel:
     
     
     # TODO - Liora
+    
     def calcEdgeWeight(self,w, pWord, pPos, cWord, cPos):
         indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
         for index in indices:
             w[index] = w[index]*1
         return w
     
-        
     
     # TODO - Liora
     
     def train(self,iterNum):
-        self.perceptron(iterNum)
-        return
+        self.w = self.perceptron(iterNum)
+        
     
     # TODO - Liora
     
@@ -123,25 +124,28 @@ class mstModel:
 #         k = 0 #for the perceptron iteration
         for iter in range(0,iterNum):
             for sentence in self.allSentences:
-                    currFeatureVectorIndices = set()
-                    for wordIndex in range(0,len(sentence.words)):
-                            indices = self.getEdgeFeatureIndices(sentence.words[sentence.goldHeads[wordIndex]-1],\
-                                                sentence.poss[sentence.goldHeads[wordIndex]-1],\
-                                                sentence.words[wordIndex],\
-                                                sentence.poss[wordIndex])
-                            for index in indices:
-                                currFeatureVectorIndices.add(index)
-                            
-                    (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.ciuLiuEdmonds(sentence,w)
-                    diffFeatureIndices = currFeatureVectorIndices
-                    if maxSpanningTree != sentence.goldHeads: #TODO....
-                        for featureIndex in currFeatureVectorIndices:
-                            if featureIndex in maxSpanningTreeFeatureIndices:
-                                diffFeatureIndices[featureIndex] = 0
-                        w = w + diffFeatureIndices
+                currFeatureVectorIndices = {}
+                for wordIndex in range(0,len(sentence.words)):
+                        indices = self.getEdgeFeatureIndices(sentence.words[sentence.goldHeads[wordIndex]-1],\
+                                            sentence.poss[sentence.goldHeads[wordIndex]-1],\
+                                            sentence.words[wordIndex],\
+                                            sentence.poss[wordIndex])
+                        for index in indices:
+                            if currFeatureVectorIndices.has_key(index):
+                                currFeatureVectorIndices[index] += 1
+                            else:
+                                currFeatureVectorIndices[index] = 1       
+                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.ciuLiuEdmonds(sentence,w)
+                diffFeatureIndices = {}
+                if maxSpanningTree != sentence.goldHeads: #TODO....
+                    for featureIndex in currFeatureVectorIndices.keys():
+                        if featureIndex in maxSpanningTreeFeatureIndices.keys():
+                            diffFeatureIndices[featureIndex] -= 1
+                    w = w + diffFeatureIndices
         return w
     
     # TODO - Ilan
+    
     def ciuLiuEdmonds(self):
         return
     
