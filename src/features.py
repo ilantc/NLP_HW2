@@ -78,3 +78,5 @@ class biPPosCPos():
     
     def val(self,pWord,pPos,cWord,cPos):
         return 1 if ((self.pPos == pPos) and (self.cPos == cPos)) else 0;
+
+
