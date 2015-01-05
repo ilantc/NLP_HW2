@@ -201,9 +201,8 @@ class mstModel:
         return Gc
     
     def chuLiuEdmonds(self, sentence, w):
-        n = len(sentence.words)
-        G = self.initGraph(n,w)
-        G.ge
+#         n = len(sentence.words)
+#         G = self.initGraph(n,w)
         
         return
     
