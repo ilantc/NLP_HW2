@@ -1,6 +1,7 @@
 import re
 import sentence
 import networkx as nx
+import math
 
 class mstModel:
     
@@ -139,7 +140,7 @@ class mstModel:
                                 currFeatureVectorIndices[index] += 1
                             else:
                                 currFeatureVectorIndices[index] = 1       
-                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.ciuLiuEdmonds(sentence,w)
+                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmonds(sentence,w)
                 diffFeatureIndices = {}
                 if maxSpanningTree != sentence.goldHeads: #TODO....
                     for featureIndex in currFeatureVectorIndices.keys():
@@ -175,10 +176,34 @@ class mstModel:
     
     # TODO - Ilan
     
-    def ciuLiuEdmonds(self, sentence, w):
+    def contract(self,G,C_edges):
+        C_nodes = [u for (u,_) in C_edges]
+        subgraphNodes = filter(lambda node: node not in C_nodes, G.nodes())
+        Gc = G.subgraph(subgraphNodes)
+        newNode = "".join(C_nodes)
+        G.add_node(newNode)
+        scoreC = sum(G[u][v]['weight'] for (u,v) in C_edges)
+        for node in subgraphNodes:
+            edgesFromC = [(c,node) for c in filter(lambda cNode: G.has_edge(cNode,node),C_nodes)]
+            if len(edgesFromC) > 0:
+                (best_c,node) = max(edgesFromC, key = lambda (u,v): G[u][v]['weight'])
+                Gc.add_edge(newNode,node,{'weight': G[best_c][node]['weight']})
+            
+            edgesToC = [(node,c) for c in filter(lambda cNode: G.has_edge(node,cNode),C_nodes)]
+            if len(edgesToC) > 0:
+                bestScore = float('Inf') * (-1)
+                for (node,c_node) in edgesToC:
+                    (c_u,_) = filter(lambda (u,v): v == c_node,C_edges)
+                    score = G[node][c_node]['weight'] - G[c_u][c_node]['weight']
+                    if score > bestScore:
+                        bestScore = score
+                Gc.add_edge(node,newNode,bestScore + scoreC)
+        return Gc
+    
+    def chuLiuEdmonds(self, sentence, w):
         n = len(sentence.words)
         G = self.initGraph(n,w)
-
+        G.ge
         
         return
     
