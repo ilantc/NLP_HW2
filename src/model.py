@@ -113,7 +113,19 @@ class mstModel:
             indices.append(self.featureDict['pPosCPos'][(pPos,cPos)])
         return indices
     
-    
+    def calcFeatureVectorPerSentence(self, sentence, heads):
+        featureVectorIndices = {}
+        for wordIndex in range(0,len(sentence.words)):
+            indices = self.getEdgeFeatureIndices(sentence.words[heads[wordIndex]-1],\
+                                sentence.poss[heads[wordIndex]-1],\
+                                sentence.words[wordIndex],\
+                                sentence.poss[wordIndex])
+            for index in indices:
+                if featureVectorIndices.has_key(index):
+                    featureVectorIndices[index] += 1
+                else:
+                    featureVectorIndices[index] = 1
+        return featureVectorIndices 
     # TODO - Liora
     
     def calcEdgeWeight(self, pWord, pPos, cWord, cPos):
@@ -137,18 +149,8 @@ class mstModel:
 #         k = 0 #for the perceptron iteration
         for iter in range(0,iterNum):
             for sentence in self.allSentences:
-                currFeatureVectorIndices = {}
-                for wordIndex in range(0,len(sentence.words)):
-                        indices = self.getEdgeFeatureIndices(sentence.words[sentence.goldHeads[wordIndex]-1],\
-                                            sentence.poss[sentence.goldHeads[wordIndex]-1],\
-                                            sentence.words[wordIndex],\
-                                            sentence.poss[wordIndex])
-                        for index in indices:
-                            if currFeatureVectorIndices.has_key(index):
-                                currFeatureVectorIndices[index] += 1
-                            else:
-                                currFeatureVectorIndices[index] = 1       
-                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmonds(sentence,w)
+                currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
+                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmondsWrapper(sentence)
                 diffFeatureIndices = {}
                 if maxSpanningTree != sentence.goldHeads: #TODO....
                     for featureIndex in currFeatureVectorIndices.keys():
@@ -157,10 +159,9 @@ class mstModel:
                     w = w + diffFeatureIndices
         return w
     
-    def initGraph(self,n):
+    def initGraph(self,sentence):
         G = nx.DiGraph()
         n = len(sentence.words)
-        
         # add all nodes and edges
         G.add_nodes_from(range(n + 1)) 
         
@@ -188,32 +189,101 @@ class mstModel:
         C_nodes = [u for (u,_) in C_edges]
         subgraphNodes = filter(lambda node: node not in C_nodes, G.nodes())
         Gc = G.subgraph(subgraphNodes)
-        newNode = "".join(C_nodes)
+        newNode = "_".join(map(lambda node: str(node),C_nodes))
         G.add_node(newNode)
         scoreC = sum(G[u][v]['weight'] for (u,v) in C_edges)
         for node in subgraphNodes:
             edgesFromC = [(c,node) for c in filter(lambda cNode: G.has_edge(cNode,node),C_nodes)]
             if len(edgesFromC) > 0:
                 (best_c,node) = max(edgesFromC, key = lambda (u,v): G[u][v]['weight'])
-                Gc.add_edge(newNode,node,{'weight': G[best_c][node]['weight']})
+                Gc.add_edge(newNode,node,{'weight': G[best_c][node]['weight'], 'origU': best_c})
             
             edgesToC = [(node,c) for c in filter(lambda cNode: G.has_edge(node,cNode),C_nodes)]
             if len(edgesToC) > 0:
                 bestScore = float('Inf') * (-1)
+                bestCnode = 0
                 for (node,c_node) in edgesToC:
-                    (c_u,_) = filter(lambda (u,v): v == c_node,C_edges)
+                    filtered = filter(lambda (u,v): v == c_node,C_edges)
+                    (c_u,_) = filtered[0]
                     score = G[node][c_node]['weight'] - G[c_u][c_node]['weight']
                     if score > bestScore:
                         bestScore = score
-                Gc.add_edge(node,newNode,bestScore + scoreC)
-        return Gc
+                        bestCnode = c_node
+                Gc.add_edge(node,newNode,{'weight': bestScore + scoreC, 'origV': bestCnode})
+        return {'G':Gc, 'newnode':newNode}
     
-    def chuLiuEdmonds(self, sentence, w):
-#         n = len(sentence.words)
-#         G = self.initGraph(n,w)        
-        return
+    def chuLiuEdmondsWrapper(self, sentence):
+        G = self.initGraph(sentence)
+        optG = self.chuLiuEdmonds(G)
+        
+        heads = [0] * len(sentence.words)
+        for (p,c) in optG.edges():
+            heads[c] = p
+        featureVec = self.calcFeatureVectorPerSentence(sentence,heads)
+        return (heads,featureVec)
+    
+    def chuLiuEdmonds(self,G):
+        edges = G.edges()
+        bestInEdges = []
+        for node in G.nodes():
+            if node == 0:
+                continue
+            allInNodes = [u for (u,_) in filter(lambda (u,v): v == node, edges)]
+            bestP = max(allInNodes, key = lambda u: G[u][node]['weight'])
+            bestInEdges.append((bestP,node,G.get_edge_data(bestP,node)))
+        newG = nx.DiGraph()
+        newG.add_nodes_from(G.nodes())
+        newG.add_edges_from(bestInEdges)
+        
+        # get the first cycle in newG
+        try:
+            c = nx.simple_cycles(newG).next()
+        except StopIteration:
+            return newG
+        C_edges = []
+        for c_node_index in range(len(c) - 1):
+            C_edges.append((c[c_node_index],c[c_node_index + 1]))
+        C_edges.append((c[-1],c[0]))
+        contractOutput = self.contract(G, C_edges)
+        Gc = contractOutput['G']
+        newNode = contractOutput['newnode']
+        Gopt = self.chuLiuEdmonds(Gc)
+        
+        # now we need to take care of the new graph:
+        # 1) remove the dummy node that was contracted
+        newNodeInEdge = filter(lambda (u,v): v == newNode,Gopt.edges())
+        newNodeInEdgeU = newNodeInEdge[0][0]
+        newNodeInEdgeV = newNodeInEdge[0][1]
+        newNodeInEdgeData = Gopt.get_edge_data(newNodeInEdgeU,newNodeInEdgeV)
+        
+        newNodeOutEdge = filter(lambda (u,v): u == newNode,Gopt.edges())
+        if len(newNodeOutEdge) > 0:
+            newNodeOutEdgeU = newNodeOutEdge[0][0]
+            newNodeOutEdgeV = newNodeOutEdge[0][1]
+            newNodeOutEdgeData = Gc.get_edge_data(newNodeOutEdgeU,newNodeOutEdgeV)
+        
+        Gopt.remove_node(newNode)
+        
+        # 2) add the edges from C
+        for (u,v) in C_edges:
+            Gopt.add_edge(u,v,G.get_edge_data(u,v))
+        
+        # 3) remove the edge from C that cones just before the entry point to C in the 
+        # contracted graph, 
+        uToRemove = c[c.index(newNodeInEdgeData['origV']) - 1]
+        Gopt.remove_edge(uToRemove,newNodeInEdgeData['origV'])
+        
+        # 4) add the incoming edge to the contracted node back to the graph
+        Gopt.add_edge(newNodeInEdgeU, newNodeInEdgeData['origV'], G.get_edge_data(newNodeInEdgeU, newNodeInEdgeData['origV']))
+        
+        # 5) if there was an outgoing edge from the contracted node, add it as well
+        if len(newNodeOutEdge) > 0:
+            Gopt.add_edge(newNodeOutEdgeData['origU'],newNodeOutEdgeV, G.get_edge_data(newNodeOutEdgeData['origU'],newNodeOutEdgeV))
+        
+        return Gopt
     
     # TODO - Ilan
+    
     def test(self):
         return
     
