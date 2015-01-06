@@ -5,7 +5,7 @@ import math
 
 class mstModel:
     
-    w = []
+    w_f = []
     featureDict = {'pWord': {}, 'pPos' : {}, 'cWord': {}, 'cPos': {},'pWordPPos':{},\
                    'cWordCPos':{}, 'pPosCWordCPos':{}, 'pPosCPos':{}}
     allSentences = []
@@ -16,7 +16,7 @@ class mstModel:
     
     def __init__(self):
         self.featuresNum = 0
-        self.w = []
+        self.w_f = []
         return
     
     def readFile(self,numSentences,offset = 0,inputFile = "../data/wsj_gold_dependency"):
@@ -59,29 +59,37 @@ class mstModel:
         featureIndex = 0
         for sentence in self.allSentences:
             for wordIndex in range(0,len(sentence.words)):
-                if not self.featureDict['cWord'].has_key(sentence.words[wordIndex]):
-                    self.featureDict['cWord'][sentence.words[wordIndex]] = featureIndex
+                cWord = sentence.words[wordIndex] 
+                cPos = sentence.poss[wordIndex]
+                if wordIndex == 0:
+                    pWord = self.rootSymbol
+                    pPos = self.rootPOS
+                else:
+                    pWord = sentence.words[sentence.goldHeads[wordIndex]-1]
+                    pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                if not self.featureDict['cWord'].has_key(cWord):
+                    self.featureDict['cWord'][cWord] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['cPos'].has_key(sentence.poss[wordIndex]):
-                    self.featureDict['cPos'][sentence.poss[wordIndex]] = featureIndex
+                if not self.featureDict['cPos'].has_key(cPos):
+                    self.featureDict['cPos'][cPos] = featureIndex
                     featureIndex += 1   
-                if not self.featureDict['pWord'].has_key(sentence.words[sentence.goldHeads[wordIndex]-1]):
-                    self.featureDict['pWord'][sentence.words[sentence.goldHeads[wordIndex]-1]] = featureIndex
+                if not self.featureDict['pWord'].has_key(pWord):
+                    self.featureDict['pWord'][pWord] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['pPos'].has_key(sentence.poss[sentence.goldHeads[wordIndex]-1]):
-                    self.featureDict['pPos'][sentence.poss[sentence.goldHeads[wordIndex]-1]] = featureIndex
+                if not self.featureDict['pPos'].has_key(pPos):
+                    self.featureDict['pPos'][pPos] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['pWordPPos'].has_key((sentence.words[sentence.goldHeads[wordIndex]-1],sentence.poss[sentence.goldHeads[wordIndex]-1])):
-                    self.featureDict['pWordPPos'][(sentence.words[sentence.goldHeads[wordIndex]-1],sentence.poss[sentence.goldHeads[wordIndex]-1])] = featureIndex
+                if not self.featureDict['pWordPPos'].has_key((pWord,pPos)):
+                    self.featureDict['pWordPPos'][(pWord,pPos)] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['cWordCPos'].has_key((sentence.words[wordIndex],sentence.poss[wordIndex])):
-                    self.featureDict['cWordCPos'][(sentence.words[wordIndex],sentence.poss[wordIndex])] = featureIndex
+                if not self.featureDict['cWordCPos'].has_key((cWord,cPos)):
+                    self.featureDict['cWordCPos'][(cWord,cPos)] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['pPosCWordCPos'].has_key((sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.words[wordIndex],sentence.poss[wordIndex])):
-                    self.featureDict['pPosCWordCPos'][(sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.words[wordIndex],sentence.poss[wordIndex])] = featureIndex
+                if not self.featureDict['pPosCWordCPos'].has_key((pPos,cWord,cPos)):
+                    self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)] = featureIndex
                     featureIndex += 1
-                if not self.featureDict['pPosCPos'].has_key((sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.poss[wordIndex])):
-                    self.featureDict['pPosCPos'][(sentence.poss[sentence.goldHeads[wordIndex]-1],sentence.poss[wordIndex])] = featureIndex    
+                if not self.featureDict['pPosCPos'].has_key((pPos,cPos)):
+                    self.featureDict['pPosCPos'][(pPos,cPos)] = featureIndex    
                     featureIndex += 1               
         self.featuresNum = featureIndex
     
@@ -108,17 +116,17 @@ class mstModel:
     
     # TODO - Liora
     
-    def calcEdgeWeight(self,w, pWord, pPos, cWord, cPos):
+    def calcEdgeWeight(self, pWord, pPos, cWord, cPos):
         indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+        w_e = 0
         for index in indices:
-            w[index] = w[index]*1
-        return w
-    
+            w_e += self.w_f[index]*1
+        return w_e
     
     # TODO - Liora
     
     def train(self,iterNum):
-        self.w = self.perceptron(iterNum)
+        self.w_f = self.perceptron(iterNum)
         
     
     # TODO - Liora
@@ -149,7 +157,7 @@ class mstModel:
                     w = w + diffFeatureIndices
         return w
     
-    def initGraph(self,n,w):
+    def initGraph(self,n):
         G = nx.DiGraph()
         n = len(sentence.words)
         
@@ -169,7 +177,7 @@ class mstModel:
                     continue
                 cWord = sentence.words[c - 1]
                 cPos = sentence.poss[c - 1]
-                w_e = self.calcEdgeWeight(w, pWord, pPos, cWord, cPos)
+                w_e = self.calcEdgeWeight( pWord, pPos, cWord, cPos)
                 G.add_edge(p, c, {'weight': w_e})
         
         return G
@@ -202,8 +210,7 @@ class mstModel:
     
     def chuLiuEdmonds(self, sentence, w):
 #         n = len(sentence.words)
-#         G = self.initGraph(n,w)
-        
+#         G = self.initGraph(n,w)        
         return
     
     # TODO - Ilan
