@@ -123,7 +123,7 @@ class mstModel:
         for childIndex in range(0,len(sentence.words)):
             cWord = sentence.words[childIndex] 
             cPos = sentence.poss[childIndex]
-            if sentence.goldHeads[childIndex] != 0:
+            if heads[childIndex] != 0:
                 pWord = sentence.words[heads[childIndex]-1]
                 pPos = sentence.poss[heads[childIndex]-1]
             else:
@@ -168,7 +168,7 @@ class mstModel:
             for sentence in self.allSentences:
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
                 (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmondsWrapper(sentence)
-                if maxSpanningTree != sentence.goldHeads: #TODO....
+                if maxSpanningTree != sentence.goldHeads:
                     for featureIndex in currFeatureVectorIndices.keys():
                         self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
                     for featureIndex in maxSpanningTreeFeatureIndices.keys():
@@ -206,7 +206,7 @@ class mstModel:
         subgraphNodes = filter(lambda node: node not in C_nodes, G.nodes())
         Gc = G.subgraph(subgraphNodes)
         newNode = "_".join(map(lambda node: str(node),C_nodes))
-        G.add_node(newNode)
+        Gc.add_node(newNode)
         scoreC = sum(G[u][v]['weight'] for (u,v) in C_edges)
         for node in subgraphNodes:
             edgesFromC = [(c,node) for c in filter(lambda cNode: G.has_edge(cNode,node),C_nodes)]
@@ -268,15 +268,19 @@ class mstModel:
         # now we need to take care of the new graph:
         # 1) remove the dummy node that was contracted
         newNodeInEdge = filter(lambda (u,v): v == newNode,Gopt.edges())
+        if len(newNodeInEdge)==0:
+            print "oh no"
         newNodeInEdgeU = newNodeInEdge[0][0]
         newNodeInEdgeV = newNodeInEdge[0][1]
-        newNodeInEdgeData = Gopt.get_edge_data(newNodeInEdgeU,newNodeInEdgeV)
+        newNodeInEdgeData = Gc.get_edge_data(newNodeInEdgeU,newNodeInEdgeV)
         
-        newNodeOutEdge = filter(lambda (u,v): u == newNode,Gopt.edges())
-        if len(newNodeOutEdge) > 0:
-            newNodeOutEdgeU = newNodeOutEdge[0][0]
-            newNodeOutEdgeV = newNodeOutEdge[0][1]
+        newNodeOutEdges = filter(lambda (u,v): u == newNode,Gopt.edges())
+        edgesToAdd = []
+        for i in range(len(newNodeOutEdges)):
+            newNodeOutEdgeU = newNodeOutEdges[i][0]
+            newNodeOutEdgeV = newNodeOutEdges[i][1]
             newNodeOutEdgeData = Gc.get_edge_data(newNodeOutEdgeU,newNodeOutEdgeV)
+            edgesToAdd.append({'u':newNodeOutEdgeU, 'v':newNodeOutEdgeV, 'data': newNodeOutEdgeData})
         
         Gopt.remove_node(newNode)
         
@@ -293,8 +297,11 @@ class mstModel:
         Gopt.add_edge(newNodeInEdgeU, newNodeInEdgeData['origV'], G.get_edge_data(newNodeInEdgeU, newNodeInEdgeData['origV']))
         
         # 5) if there was an outgoing edge from the contracted node, add it as well
-        if len(newNodeOutEdge) > 0:
-            Gopt.add_edge(newNodeOutEdgeData['origU'],newNodeOutEdgeV, G.get_edge_data(newNodeOutEdgeData['origU'],newNodeOutEdgeV))
+#         if len(newNodeOutEdge) > 0:
+#             Gopt.add_edge(newNodeOutEdgeData['origU'],newNodeOutEdgeV, G.get_edge_data(newNodeOutEdgeData['origU'],newNodeOutEdgeV))
+        for edgeToAdd in edgesToAdd:
+            Gopt.add_edge(edgeToAdd['data']['origU'],edgeToAdd['v'], G.get_edge_data(edgeToAdd['data']['origU'],edgeToAdd['v']))
+        
         
         return Gopt
     
