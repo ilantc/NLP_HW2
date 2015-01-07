@@ -135,8 +135,8 @@ class mstModel:
                 #for the root 
                 pWord = self.rootSymbol
                 pPos = self.rootPOS
-                cWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                cPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                cWord = sentence.words[heads[wordIndex]-1] 
+                cPos = sentence.poss[heads[wordIndex]-1]
                 indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
                 for index in indices:
                     if featureVectorIndices.has_key(index):
@@ -146,14 +146,14 @@ class mstModel:
                 #back to normal order
                 cWord = sentence.words[wordIndex] 
                 cPos = sentence.poss[wordIndex]
-                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                pWord = sentence.words[heads[wordIndex]-1] 
+                pPos = sentence.poss[heads[wordIndex]-1]
                 indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
             else:
                 cWord = sentence.words[wordIndex] 
                 cPos = sentence.poss[wordIndex]
-                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                pWord = sentence.words[heads[wordIndex]-1] 
+                pPos = sentence.poss[heads[wordIndex]-1]
                 indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
                   
             for index in indices:
@@ -179,27 +179,25 @@ class mstModel:
     # TODO - Liora
     
     def train(self,iterNum):
-        self.w_f = self.perceptron(iterNum)
+        self.perceptron(iterNum)
         
     
     # TODO - Liora
     
     def perceptron(self,iterNum):
         print "running perceptron for",iterNum," iterations"
-        w = [0]*self.featuresNum
         self.w_f = [0]*self.featuresNum
 #         k = 0 #for the perceptron iteration
-        for iter in range(0,iterNum):
+        for _ in range(0,iterNum):
             for sentence in self.allSentences:
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
                 (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmondsWrapper(sentence)
-                diffFeatureIndices = {}
                 if maxSpanningTree != sentence.goldHeads: #TODO....
                     for featureIndex in currFeatureVectorIndices.keys():
-                        if featureIndex in maxSpanningTreeFeatureIndices.keys():
-                            diffFeatureIndices[featureIndex] -= 1
-                    w = w + diffFeatureIndices
-        return w
+                        self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
+                    for featureIndex in maxSpanningTreeFeatureIndices.keys():
+                        self.w_f[featureIndex] -= maxSpanningTreeFeatureIndices[featureIndex]
+        return
     
     def initGraph(self,sentence):
         G = nx.DiGraph()
