@@ -155,27 +155,25 @@ class mstModel:
     # TODO - Liora
     
     def train(self,iterNum):
-        self.w_f = self.perceptron(iterNum)
+        self.perceptron(iterNum)
         
     
     # TODO - Liora
     
     def perceptron(self,iterNum):
         print "running perceptron for",iterNum," iterations"
-        w = [0]*self.featuresNum
         self.w_f = [0]*self.featuresNum
 #         k = 0 #for the perceptron iteration
-        for iter in range(0,iterNum):
+        for _ in range(0,iterNum):
             for sentence in self.allSentences:
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
                 (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmondsWrapper(sentence)
-                diffFeatureIndices = {}
                 if maxSpanningTree != sentence.goldHeads: #TODO....
                     for featureIndex in currFeatureVectorIndices.keys():
-                        if featureIndex in maxSpanningTreeFeatureIndices.keys():
-                            diffFeatureIndices[featureIndex] -= 1
-                    w = w + diffFeatureIndices
-        return w
+                        self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
+                    for featureIndex in maxSpanningTreeFeatureIndices.keys():
+                        self.w_f[featureIndex] -= maxSpanningTreeFeatureIndices[featureIndex]
+        return
     
     def initGraph(self,sentence):
         G = nx.DiGraph()
