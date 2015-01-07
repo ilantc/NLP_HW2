@@ -1,20 +1,22 @@
 import model
+import math
 
 
 
 def main():
-    numTrain = 30
+    numTrain = 1
     dependencyTreeModel = model.mstModel()
     dependencyTreeModel.allSentences = dependencyTreeModel.readFile(numTrain)
     dependencyTreeModel.buildFeatureMapping()    
-    trainIterNum = 2
+    trainIterNum = 20
     dependencyTreeModel.train(trainIterNum)
-    
-    allSentences = dependencyTreeModel.readFile(1,numTrain)
+    print "sumW =", sum(dependencyTreeModel.w_f)
+    print "normW =", math.sqrt(sum([w_i * w_i for w_i in dependencyTreeModel.w_f]))
+    allSentences = dependencyTreeModel.readFile(1)
     
     (optHeads,_) = dependencyTreeModel.chuLiuEdmondsWrapper(allSentences[0])
-    print "done!"
     print optHeads
+    print allSentences[0].goldHeads
 
 if __name__ == '__main__':
     main()

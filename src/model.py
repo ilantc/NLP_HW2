@@ -124,8 +124,8 @@ class mstModel:
             cWord = sentence.words[childIndex] 
             cPos = sentence.poss[childIndex]
             if sentence.goldHeads[childIndex] != 0:
-                pWord = sentence.words[sentence.goldHeads[childIndex]-1]
-                pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
+                pWord = sentence.words[heads[childIndex]-1]
+                pPos = sentence.poss[heads[childIndex]-1]
             else:
                 pWord = self.rootSymbol
                 pPos = self.rootPOS
