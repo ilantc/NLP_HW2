@@ -167,7 +167,7 @@ class mstModel:
         for _ in range(0,iterNum):
             for sentence in self.allSentences:
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
-                (maxSpanningTree,maxSpanningTreeFeatureIndices) = self.chuLiuEdmondsWrapper(sentence)
+                (maxSpanningTree,maxSpanningTreeFeatureIndices,_) = self.chuLiuEdmondsWrapper(sentence)
                 if maxSpanningTree != sentence.goldHeads:
                     for featureIndex in currFeatureVectorIndices.keys():
                         self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
@@ -236,7 +236,7 @@ class mstModel:
         for (p,c) in optG.edges():
             heads[c - 1] = p
         featureVec = self.calcFeatureVectorPerSentence(sentence,heads)
-        return (heads,featureVec)
+        return (heads,featureVec,G)
     
     def chuLiuEdmonds(self,G):
         edges = G.edges()
@@ -304,6 +304,13 @@ class mstModel:
         
         
         return Gopt
+    
+    def treeVal(self,G,heads):
+        score = 0
+        for v in range(len(heads)):
+            u = heads[v]
+            score += G[u][v + 1]['weight']
+        return score
     
     # TODO - Ilan
     
