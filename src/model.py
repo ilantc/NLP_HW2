@@ -2,6 +2,7 @@ import re
 import sentence
 import networkx as nx
 import math
+import sys
 
 class mstModel:
     
@@ -16,6 +17,7 @@ class mstModel:
     
     def __init__(self):
         self.featuresNum = 0
+        self.featureIndex = 0 
         self.w_f = []
         return
     
@@ -55,43 +57,56 @@ class mstModel:
     
     # TODO - Liora
     
+    def insertToFeaturesDicts(self,pWord, pPos, cWord, cPos):
+        if not self.featureDict['cWord'].has_key(cWord):
+            self.featureDict['cWord'][cWord] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['cPos'].has_key(cPos):
+            self.featureDict['cPos'][cPos] = self.featureIndex
+            self.featureIndex += 1   
+        if not self.featureDict['pWord'].has_key(pWord):
+            self.featureDict['pWord'][pWord] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['pPos'].has_key(pPos):
+            self.featureDict['pPos'][pPos] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['pWordPPos'].has_key((pWord,pPos)):
+            self.featureDict['pWordPPos'][(pWord,pPos)] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['cWordCPos'].has_key((cWord,cPos)):
+            self.featureDict['cWordCPos'][(cWord,cPos)] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['pPosCWordCPos'].has_key((pPos,cWord,cPos)):
+            self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)] = self.featureIndex
+            self.featureIndex += 1
+        if not self.featureDict['pPosCPos'].has_key((pPos,cPos)):
+            self.featureDict['pPosCPos'][(pPos,cPos)] = self.featureIndex    
+            self.featureIndex += 1   
+    
     def buildFeatureMapping(self):
-        featureIndex = 0
+#         featureIndex = 0
         for sentence in self.allSentences:
             for wordIndex in range(0,len(sentence.words)):
-                cWord = sentence.words[wordIndex] 
-                cPos = sentence.poss[wordIndex]
                 if wordIndex == 0:
+                    #insert the root
                     pWord = self.rootSymbol
                     pPos = self.rootPOS
+                    cWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
+                    cPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)
+                    #back to normal words.order
+                    cWord = sentence.words[wordIndex] 
+                    cPos = sentence.poss[wordIndex]
+                    pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
+                    pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)
                 else:
+                    cWord = sentence.words[wordIndex] 
+                    cPos = sentence.poss[wordIndex]
                     pWord = sentence.words[sentence.goldHeads[wordIndex]-1]
                     pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
-                if not self.featureDict['cWord'].has_key(cWord):
-                    self.featureDict['cWord'][cWord] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['cPos'].has_key(cPos):
-                    self.featureDict['cPos'][cPos] = featureIndex
-                    featureIndex += 1   
-                if not self.featureDict['pWord'].has_key(pWord):
-                    self.featureDict['pWord'][pWord] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['pPos'].has_key(pPos):
-                    self.featureDict['pPos'][pPos] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['pWordPPos'].has_key((pWord,pPos)):
-                    self.featureDict['pWordPPos'][(pWord,pPos)] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['cWordCPos'].has_key((cWord,cPos)):
-                    self.featureDict['cWordCPos'][(cWord,cPos)] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['pPosCWordCPos'].has_key((pPos,cWord,cPos)):
-                    self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)] = featureIndex
-                    featureIndex += 1
-                if not self.featureDict['pPosCPos'].has_key((pPos,cPos)):
-                    self.featureDict['pPosCPos'][(pPos,cPos)] = featureIndex    
-                    featureIndex += 1               
-        self.featuresNum = featureIndex
+                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
+        self.featuresNum = self.featureIndex
     
     def getEdgeFeatureIndices(self,pWord, pPos, cWord, cPos):
         indices = []
@@ -116,10 +131,31 @@ class mstModel:
     def calcFeatureVectorPerSentence(self, sentence, heads):
         featureVectorIndices = {}
         for wordIndex in range(0,len(sentence.words)):
-            indices = self.getEdgeFeatureIndices(sentence.words[heads[wordIndex]-1],\
-                                sentence.poss[heads[wordIndex]-1],\
-                                sentence.words[wordIndex],\
-                                sentence.poss[wordIndex])
+            if wordIndex == 0 :
+                #for the root 
+                pWord = self.rootSymbol
+                pPos = self.rootPOS
+                cWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
+                cPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+                for index in indices:
+                    if featureVectorIndices.has_key(index):
+                        featureVectorIndices[index] += 1
+                    else:
+                        featureVectorIndices[index] = 1
+                #back to normal order
+                cWord = sentence.words[wordIndex] 
+                cPos = sentence.poss[wordIndex]
+                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
+                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+            else:
+                cWord = sentence.words[wordIndex] 
+                cPos = sentence.poss[wordIndex]
+                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
+                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
+                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+                  
             for index in indices:
                 if featureVectorIndices.has_key(index):
                     featureVectorIndices[index] += 1
@@ -129,10 +165,15 @@ class mstModel:
     # TODO - Liora
     
     def calcEdgeWeight(self, pWord, pPos, cWord, cPos):
-        indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
-        w_e = 0
-        for index in indices:
-            w_e += self.w_f[index]*1
+        try:
+            indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+            w_e = 0
+            for index in indices:
+                w_e += self.w_f[index]*1
+        except Exception as err: 
+            sys.stderr.write('problem in calcEdgeWeight in words:', pWord, pPos, cWord, cPos )     
+            print err.args      
+            print err
         return w_e
     
     # TODO - Liora
@@ -146,6 +187,7 @@ class mstModel:
     def perceptron(self,iterNum):
         print "running perceptron for",iterNum," iterations"
         w = [0]*self.featuresNum
+        self.w_f = [0]*self.featuresNum
 #         k = 0 #for the perceptron iteration
         for iter in range(0,iterNum):
             for sentence in self.allSentences:
