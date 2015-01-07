@@ -87,29 +87,15 @@ class mstModel:
 #         featureIndex = 0
         for sentence in self.allSentences:
             for childIndex in range(0,len(sentence.words)):
-                if childIndex == 0:
-                    #insert the root
+                cWord = sentence.words[childIndex] 
+                cPos = sentence.poss[childIndex]
+                if sentence.goldHeads[childIndex] != 0:
+                    pWord = sentence.words[sentence.goldHeads[childIndex]-1]
+                    pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
+                else:
                     pWord = self.rootSymbol
                     pPos = self.rootPOS
-                    cWord = sentence.words[childIndex] 
-                    cPos = sentence.poss[childIndex]
-                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)
-                    #back to normal words order
-                    cWord = sentence.words[childIndex] 
-                    cPos = sentence.poss[childIndex]
-                    pWord = sentence.words[sentence.goldHeads[childIndex]-1] 
-                    pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
-                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)
-                else:
-                    cWord = sentence.words[childIndex] 
-                    cPos = sentence.poss[childIndex]
-                    if sentence.goldHeads[childIndex] != 0:
-                        pWord = sentence.words[sentence.goldHeads[childIndex]-1]
-                        pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
-                    else:
-                        pWord = self.rootSymbol
-                        pPos = self.rootPOS
-                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
+                self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
         self.featuresNum = self.featureIndex
     
     def getEdgeFeatureIndices(self,pWord, pPos, cWord, cPos):
@@ -134,31 +120,17 @@ class mstModel:
     
     def calcFeatureVectorPerSentence(self, sentence, heads):
         featureVectorIndices = {}
-        for wordIndex in range(0,len(sentence.words)):
-            if wordIndex == 0 :
-                #for the root 
+        for childIndex in range(0,len(sentence.words)):
+            cWord = sentence.words[childIndex] 
+            cPos = sentence.poss[childIndex]
+            if sentence.goldHeads[childIndex] != 0:
+                pWord = sentence.words[sentence.goldHeads[childIndex]-1]
+                pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
+            else:
                 pWord = self.rootSymbol
                 pPos = self.rootPOS
-                cWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                cPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
-                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
-                for index in indices:
-                    if featureVectorIndices.has_key(index):
-                        featureVectorIndices[index] += 1
-                    else:
-                        featureVectorIndices[index] = 1
-                #back to normal order
-                cWord = sentence.words[wordIndex] 
-                cPos = sentence.poss[wordIndex]
-                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
-                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
-            else:
-                cWord = sentence.words[wordIndex] 
-                cPos = sentence.poss[wordIndex]
-                pWord = sentence.words[sentence.goldHeads[wordIndex]-1] 
-                pPos = sentence.poss[sentence.goldHeads[wordIndex]-1]
-                indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
+            
+            indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
                   
             for index in indices:
                 if featureVectorIndices.has_key(index):
