@@ -264,7 +264,7 @@ class mstModel:
         
         heads = [0] * len(sentence.words)
         for (p,c) in optG.edges():
-            heads[c] = p
+            heads[c - 1] = p
         featureVec = self.calcFeatureVectorPerSentence(sentence,heads)
         return (heads,featureVec)
     
