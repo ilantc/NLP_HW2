@@ -2,9 +2,9 @@ import model
 import math
 
 def main():
-    numTrain = 50
+    numTrain = 5000
     offset = 0
-    trainIterNum = 5
+    trainIterNum = 100
     modelFileName = "./model_nTrain_" + str(numTrain) + "_trainIterNum_" + str(trainIterNum) + ".model"
      
     dependencyTreeModel = model.mstModel()

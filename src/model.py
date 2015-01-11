@@ -108,7 +108,7 @@ class mstModel:
                 for childIndex in range(1,len(sentence.words) + 1):
                     cWord = sentence.words[childIndex - 1] 
                     cPos = sentence.poss[childIndex - 1]
-                self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
+                    self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
         self.featuresNum = self.featureIndex
     
     def getEdgeFeatureIndices(self,pWord, pPos, cWord, cPos):
@@ -169,9 +169,6 @@ class mstModel:
     def train(self,iterNum):
         self.perceptron(iterNum)
         
-    
-    # TODO - Liora
-    
     def getWNorm(self):
         return math.sqrt(sum([w_i * w_i for w_i in self.w_f]))
     
@@ -180,8 +177,14 @@ class mstModel:
         t1 = time.clock()
         self.w_f = [0]*self.featuresNum
 #         k = 0 #for the perceptron iteration
+        printIter = False
+        printStep = max(1,int(len(self.allSentences)/5))
         for nIter in range(0,iterNum):
+            if nIter % 5 == 0:
+                printIter = True
+            sIndex = 0
             for sentence in self.allSentences:
+                tSentence = time.clock()
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
                 (maxSpanningTree,maxSpanningTreeFeatureIndices,_) = self.chuLiuEdmondsWrapper(sentence)
 #                 print "w norm =",self.getWNorm(),maxSpanningTree, sentence.goldHeads
@@ -191,8 +194,21 @@ class mstModel:
                         self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
                     for featureIndex in maxSpanningTreeFeatureIndices.keys():
                         self.w_f[featureIndex] -= maxSpanningTreeFeatureIndices[featureIndex]
-            if nIter % 5 == 0:
+                if printIter and ((sIndex % printStep) == 0):
+                    print "\tdone", sIndex + 1,"sentences out of", len(self.allSentences), "average sentence time =", (time.clock() - tSentence)/(sIndex + 1)
+                sIndex += 1
+            if nIter == 19:
+                self.w_f_20 = self.w_f
+            if nIter == 49:
+                self.w_f_50 = self.w_f
+            if nIter == 79:
+                self.w_f_80 = self.w_f
+            if nIter == 99:
+                self.w_f_100 = self.w_f
+            
+            if printIter:
                 print "iter =", nIter + 1 , "average perceptron time =", (time.clock() - t1) / (nIter + 1)
+            printIter = False
         return
     
     def initGraph(self,sentence):
