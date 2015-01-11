@@ -2,17 +2,13 @@ import re
 import sentence
 import networkx as nx
 import math
+import pickle
 import sys
 import time
 
 class mstModel:
     
-    w_f = []
-    featureDict = {'pWord': {}, 'pPos' : {}, 'cWord': {}, 'cPos': {},'pWordPPos':{},\
-                   'cWordCPos':{}, 'pPosCWordCPos':{}, 'pPosCPos':{}}
-    allSentences = []
-    featuresNum = 0 
-    
+        
     rootSymbol = "__root__"
     rootPOS = "__rootPos__"
     
@@ -20,7 +16,14 @@ class mstModel:
         self.featuresNum = 0
         self.featureIndex = 0 
         self.w_f = []
+        self.w_f_20 = []
+        self.w_f_50 = []
+        self.w_f_80 = []
+        self.w_f_100 = []
         self.featureNames = []
+        self.allSentences = [] 
+        self.featureDict = {'pWord': {}, 'pPos' : {}, 'cWord': {}, 'cPos': {},'pWordPPos':{},\
+                   'cWordCPos':{}, 'pPosCWordCPos':{}, 'pPosCPos':{}}
         return
     
     def readFile(self,numSentences,offset = 0,inputFile = "../data/wsj_gold_dependency"):
@@ -329,6 +332,32 @@ class mstModel:
             score += G[u][v + 1]['weight']
         return score
     
+    def save(self,fileName):
+        """ save the model to file"""
+        with open(fileName, 'wb') as output:
+            pickler = pickle.Pickler(output, -1)
+            pickler.dump(self)
+    
+    def load(self, filename):
+        """ load a model from file """ 
+        print "loading model..."
+        t1 = time.clock()
+        with open(filename, 'rb') as inputFile:
+            modelData = pickle.load(inputFile)
+            self.w_f_20 = modelData.w_f_20
+            self.w_f_50 = modelData.w_f_50
+            self.w_f_80 = modelData.w_f_80
+            self.w_f_100 = modelData.w_f_100
+            self.w_f = modelData.w_f
+
+            self.allSentences = modelData.allSentences
+            self.featuresNum = modelData.featuresNum 
+            self.featureDict = modelData.featureDict
+
+            self.featureNames = modelData.featureNames
+        t2 = time.clock()
+        print "time to load raw data =",t2 - t1
+
     # TODO - Ilan
     
     def test(self):

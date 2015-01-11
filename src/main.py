@@ -2,14 +2,17 @@ import model
 import math
 
 def main():
-    numTrain = 1000
-    offset = 1
+    numTrain = 50
+    offset = 0
+    trainIterNum = 5
+    modelFileName = "./model_nTrain_" + str(numTrain) + "_trainIterNum_" + str(trainIterNum) + ".model"
+     
     dependencyTreeModel = model.mstModel()
     dependencyTreeModel.allSentences = dependencyTreeModel.readFile(numTrain,offset)
     dependencyTreeModel.buildFeatureMapping()    
-    trainIterNum = 80
     print "num features =",dependencyTreeModel.featuresNum
     dependencyTreeModel.train(trainIterNum)
+    dependencyTreeModel.save(modelFileName)
     print "sumW =", sum(dependencyTreeModel.w_f)
     print "normW =", dependencyTreeModel.getWNorm()
     allSentences = dependencyTreeModel.readFile(1,offset)
@@ -22,6 +25,11 @@ def main():
     print allSentences[0].goldHeads
     print "goldVal =", dependencyTreeModel.treeVal(G, allSentences[0].goldHeads)
     
+    dependencyTreeModel2 = model.mstModel()
+    dependencyTreeModel2.load(modelFileName)
+    (optHeads,_,G) = dependencyTreeModel2.chuLiuEdmondsWrapper(allSentences[0])
+    
+    print optHeads
 
 if __name__ == '__main__':
     main()
