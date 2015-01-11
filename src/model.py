@@ -3,6 +3,7 @@ import sentence
 import networkx as nx
 import math
 import sys
+import time
 
 class mstModel:
     
@@ -19,6 +20,7 @@ class mstModel:
         self.featuresNum = 0
         self.featureIndex = 0 
         self.w_f = []
+        self.featureNames = []
         return
     
     def readFile(self,numSentences,offset = 0,inputFile = "../data/wsj_gold_dependency"):
@@ -60,41 +62,49 @@ class mstModel:
     def insertToFeaturesDicts(self,pWord, pPos, cWord, cPos):
         if not self.featureDict['cWord'].has_key(cWord):
             self.featureDict['cWord'][cWord] = self.featureIndex
+            self.featureNames.append("cW     = " + cWord)
             self.featureIndex += 1
         if not self.featureDict['cPos'].has_key(cPos):
             self.featureDict['cPos'][cPos] = self.featureIndex
+            self.featureNames.append("cP     = " + cPos)
             self.featureIndex += 1   
         if not self.featureDict['pWord'].has_key(pWord):
             self.featureDict['pWord'][pWord] = self.featureIndex
+            self.featureNames.append("pW     = " + pWord)
             self.featureIndex += 1
         if not self.featureDict['pPos'].has_key(pPos):
             self.featureDict['pPos'][pPos] = self.featureIndex
+            self.featureNames.append("pP     = " + pPos)
             self.featureIndex += 1
         if not self.featureDict['pWordPPos'].has_key((pWord,pPos)):
             self.featureDict['pWordPPos'][(pWord,pPos)] = self.featureIndex
+            self.featureNames.append("pWpP   = " + pWord+","+pPos)
             self.featureIndex += 1
         if not self.featureDict['cWordCPos'].has_key((cWord,cPos)):
             self.featureDict['cWordCPos'][(cWord,cPos)] = self.featureIndex
+            self.featureNames.append("cWcP   = " + cWord+","+cPos)
             self.featureIndex += 1
         if not self.featureDict['pPosCWordCPos'].has_key((pPos,cWord,cPos)):
             self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)] = self.featureIndex
+            self.featureNames.append("pPcWcP = " + pPos+","+cWord+","+cPos)
             self.featureIndex += 1
         if not self.featureDict['pPosCPos'].has_key((pPos,cPos)):
-            self.featureDict['pPosCPos'][(pPos,cPos)] = self.featureIndex    
+            self.featureDict['pPosCPos'][(pPos,cPos)] = self.featureIndex   
+            self.featureNames.append("pPcP   = " + pPos+","+cPos) 
             self.featureIndex += 1   
     
     def buildFeatureMapping(self):
 #         featureIndex = 0
         for sentence in self.allSentences:
-            for childIndex in range(0,len(sentence.words)):
-                cWord = sentence.words[childIndex] 
-                cPos = sentence.poss[childIndex]
-                if sentence.goldHeads[childIndex] != 0:
-                    pWord = sentence.words[sentence.goldHeads[childIndex]-1]
-                    pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
-                else:
+            for parentIndex in range(0,len(sentence.words) + 1):
+                pWord = sentence.words[parentIndex - 1]
+                pPos = sentence.poss[parentIndex - 1]
+                if parentIndex == 0:
                     pWord = self.rootSymbol
                     pPos = self.rootPOS
+                for childIndex in range(1,len(sentence.words) + 1):
+                    cWord = sentence.words[childIndex - 1] 
+                    cPos = sentence.poss[childIndex - 1]
                 self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
         self.featuresNum = self.featureIndex
     
@@ -123,10 +133,9 @@ class mstModel:
         for childIndex in range(0,len(sentence.words)):
             cWord = sentence.words[childIndex] 
             cPos = sentence.poss[childIndex]
-            if heads[childIndex] != 0:
-                pWord = sentence.words[heads[childIndex]-1]
-                pPos = sentence.poss[heads[childIndex]-1]
-            else:
+            pWord = sentence.words[heads[childIndex]-1]
+            pPos = sentence.poss[heads[childIndex]-1]
+            if heads[childIndex] == 0:
                 pWord = self.rootSymbol
                 pPos = self.rootPOS
             
@@ -160,19 +169,27 @@ class mstModel:
     
     # TODO - Liora
     
+    def getWNorm(self):
+        return math.sqrt(sum([w_i * w_i for w_i in self.w_f]))
+    
     def perceptron(self,iterNum):
-        print "running perceptron for",iterNum," iterations"
+        print "running perceptron for",iterNum,"iterations"
+        t1 = time.clock()
         self.w_f = [0]*self.featuresNum
 #         k = 0 #for the perceptron iteration
-        for _ in range(0,iterNum):
+        for nIter in range(0,iterNum):
             for sentence in self.allSentences:
                 currFeatureVectorIndices = self.calcFeatureVectorPerSentence(sentence,sentence.goldHeads)
                 (maxSpanningTree,maxSpanningTreeFeatureIndices,_) = self.chuLiuEdmondsWrapper(sentence)
+#                 print "w norm =",self.getWNorm(),maxSpanningTree, sentence.goldHeads
+#                 print self.w_f
                 if maxSpanningTree != sentence.goldHeads:
                     for featureIndex in currFeatureVectorIndices.keys():
                         self.w_f[featureIndex] += currFeatureVectorIndices[featureIndex]
                     for featureIndex in maxSpanningTreeFeatureIndices.keys():
                         self.w_f[featureIndex] -= maxSpanningTreeFeatureIndices[featureIndex]
+            if nIter % 5 == 0:
+                print "iter =", nIter + 1 , "average perceptron time =", (time.clock() - t1) / (nIter + 1)
         return
     
     def initGraph(self,sentence):
@@ -252,10 +269,10 @@ class mstModel:
         newG.add_edges_from(bestInEdges)
         
         # get the first cycle in newG
-        try:
-            c = nx.simple_cycles(newG).next()
-        except StopIteration:
+        cs = list(nx.simple_cycles(newG))
+        if len(cs) == 0:
             return newG
+        c = max(cs, key = lambda circle: len(circle))
         C_edges = []
         for c_node_index in range(len(c) - 1):
             C_edges.append((c[c_node_index],c[c_node_index + 1]))
@@ -300,7 +317,7 @@ class mstModel:
 #         if len(newNodeOutEdge) > 0:
 #             Gopt.add_edge(newNodeOutEdgeData['origU'],newNodeOutEdgeV, G.get_edge_data(newNodeOutEdgeData['origU'],newNodeOutEdgeV))
         for edgeToAdd in edgesToAdd:
-            Gopt.add_edge(edgeToAdd['data']['origU'],edgeToAdd['v'], G.get_edge_data(edgeToAdd['data']['origU'],edgeToAdd['v']))
+            Gopt.add_edge(edgeToAdd['data']['origU'], edgeToAdd['v'], G.get_edge_data(edgeToAdd['data']['origU'], edgeToAdd['v']))
         
         
         return Gopt
