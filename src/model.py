@@ -5,6 +5,7 @@ import math
 import pickle
 import sys
 import time
+import csv
 
 class mstModel:
     
@@ -152,12 +153,12 @@ class mstModel:
         return featureVectorIndices 
     # TODO - Liora
     
-    def calcEdgeWeight(self, pWord, pPos, cWord, cPos):
+    def calcEdgeWeight(self, pWord, pPos, cWord, cPos, w):
         try:
             indices = self.getEdgeFeatureIndices(pWord, pPos, cWord, cPos)
             w_e = 0
             for index in indices:
-                w_e += self.w_f[index]*1
+                w_e += w[index]*1
         except Exception as err: 
             sys.stderr.write('problem in calcEdgeWeight in words:', pWord, pPos, cWord, cPos )     
             print err.args      
@@ -211,7 +212,7 @@ class mstModel:
             printIter = False
         return
     
-    def initGraph(self,sentence):
+    def initGraph(self,sentence,w):
         G = nx.DiGraph()
         n = len(sentence.words)
         # add all nodes and edges
@@ -230,7 +231,7 @@ class mstModel:
                     continue
                 cWord = sentence.words[c - 1]
                 cPos = sentence.poss[c - 1]
-                w_e = self.calcEdgeWeight( pWord, pPos, cWord, cPos)
+                w_e = self.calcEdgeWeight( pWord, pPos, cWord, cPos, w)
                 G.add_edge(p, c, {'weight': w_e})
         
         return G
@@ -264,8 +265,10 @@ class mstModel:
                 Gc.add_edge(node,newNode,{'weight': bestScore + scoreC, 'origV': bestCnode})
         return {'G':Gc, 'newnode':newNode}
     
-    def chuLiuEdmondsWrapper(self, sentence):
-        G = self.initGraph(sentence)
+    def chuLiuEdmondsWrapper(self, sentence, w=None):
+        if not w:
+            w = self.w_f
+        G = self.initGraph(sentence,w)
         optG = self.chuLiuEdmonds(G)
         
         heads = [0] * len(sentence.words)
@@ -373,10 +376,32 @@ class mstModel:
             self.featureNames = modelData.featureNames
         t2 = time.clock()
         print "time to load raw data =",t2 - t1
-
-    # TODO - Ilan
     
-    def test(self):
+    def test(self,sentences,outputFileName):
+        csvfile = open(outputFileName, 'w')
+        fieldnames = ["sentenceIndex","w_20","w_50","w_80","w_100","n"] 
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        sentenceIndex = 1
+        for sentence in sentences:
+            (optHeads_20,_,_) = self.chuLiuEdmondsWrapper(sentence,self.w_f_20)
+            allCorrect_20 = filter(lambda (g,p): g == p, zip(sentence.goldHeads,optHeads_20))
+            
+            (optHeads_50,_,_) = self.chuLiuEdmondsWrapper(sentence,self.w_f_50)
+            allCorrect_50 = filter(lambda (g,p): g == p, zip(sentence.goldHeads,optHeads_50))
+            
+            (optHeads_80,_,_) = self.chuLiuEdmondsWrapper(sentence,self.w_f_80)
+            allCorrect_80 = filter(lambda (g,p): g == p, zip(sentence.goldHeads,optHeads_80))
+            
+            (optHeads_100,_,_) = self.chuLiuEdmondsWrapper(sentence,self.w_f_100)
+            allCorrect_100 = filter(lambda (g,p): g == p, zip(sentence.goldHeads,optHeads_100))
+            
+            line = {"sentenceIndex": sentenceIndex,"w_20": len(allCorrect_20),"w_50": len(allCorrect_50),\
+                    "w_80": len(allCorrect_80),"w_100": len(allCorrect_100), "n": len(sentence.words)}
+            writer.writerow(line)
+            sentenceIndex += 1
+        
+        csvfile.close 
         return
     
     

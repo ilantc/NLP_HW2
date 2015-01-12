@@ -1,0 +1,133 @@
+num features = 370681
+running perceptron for 100 iterations
+	done 1 sentences out of 5000 average sentence time = 0.00444114665625
+	done 1001 sentences out of 5000 average sentence time = 3.93875620355e-05
+	done 2001 sentences out of 5000 average sentence time = 5.67290791808e-05
+	done 3001 sentences out of 5000 average sentence time = 7.70926366339e-06
+	done 4001 sentences out of 5000 average sentence time = 3.3846527323e-07
+iter = 1 average perceptron time = 375.886940638
+	done 1 sentences out of 5000 average sentence time = 0.0123339022621
+	done 1001 sentences out of 5000 average sentence time = 3.6436088392e-05
+	done 2001 sentences out of 5000 average sentence time = 6.0186355366e-05
+	done 3001 sentences out of 5000 average sentence time = 7.42750938989e-06
+	done 4001 sentences out of 5000 average sentence time = 3.27751481662e-07
+iter = 6 average perceptron time = 355.153550915
+	done 1 sentences out of 5000 average sentence time = 0.0126415102313
+	done 1001 sentences out of 5000 average sentence time = 3.85464810105e-05
+	done 2001 sentences out of 5000 average sentence time = 5.7641183375e-05
+	done 3001 sentences out of 5000 average sentence time = 7.48705902577e-06
+	done 4001 sentences out of 5000 average sentence time = 3.31297595708e-07
+iter = 11 average perceptron time = 353.400720372
+		done 1 sentences out of 5000 average sentence time = 0.0125636271532
+	done 1001 sentences out of 5000 average sentence time = 3.63380778743e-05
+	done 2001 sentences out of 5000 average sentence time = 5.55923433054e-05
+	done 3001 sentences out of 5000 average sentence time = 7.61088605556e-06
+	done 4001 sentences out of 5000 average sentence time = 3.54762308397e-07
+iter = 16 average perceptron time = 354.491106802
+	done 1 sentences out of 5000 average sentence time = 0.0301274686371
+	done 1001 sentences out of 5000 average sentence time = 3.58290263256e-05
+	done 2001 sentences out of 5000 average sentence time = 5.40713650582e-05
+	done 3001 sentences out of 5000 average sentence time = 7.39190031729e-06
+	done 4001 sentences out of 5000 average sentence time = 3.5921381328e-07
+iter = 21 average perceptron time = 351.823704696
+	done 1 sentences out of 5000 average sentence time = 0.0121896072578
+	done 1001 sentences out of 5000 average sentence time = 3.60950117909e-05
+	done 2001 sentences out of 5000 average sentence time = 5.37776391459e-05
+	done 3001 sentences out of 5000 average sentence time = 7.30991897735e-06
+	done 4001 sentences out of 5000 average sentence time = 3.58232973367e-07
+iter = 26 average perceptron time = 349.895869663
+	done 1 sentences out of 5000 average sentence time = 0.0309425240994
+	done 1001 sentences out of 5000 average sentence time = 3.58760713738e-05
+	done 2001 sentences out of 5000 average sentence time = 5.43513626402e-05
+	done 3001 sentences out of 5000 average sentence time = 7.33838611727e-06
+	done 4001 sentences out of 5000 average sentence time = 3.58157523724e-07
+iter = 31 average perceptron time = 348.620208869
+	done 1 sentences out of 5000 average sentence time = 0.012847689075
+	done 1001 sentences out of 5000 average sentence time = 3.67904341091e-05
+	done 2001 sentences out of 5000 average sentence time = 5.3799966539e-05
+	done 3001 sentences out of 5000 average sentence time = 7.66842387953e-06
+	done 4001 sentences out of 5000 average sentence time = 3.58308422102e-07
+iter = 36 average perceptron time = 347.769350918
+	done 1 sentences out of 5000 average sentence time = 0.0311870407386
+	done 1001 sentences out of 5000 average sentence time = 3.56713047855e-05
+	done 2001 sentences out of 5000 average sentence time = 5.4441426518e-05
+	done 3001 sentences out of 5000 average sentence time = 7.47891118717e-06
+	done 4001 sentences out of 5000 average sentence time = 3.62382681039e-07
+iter = 41 average perceptron time = 347.140879473
+	done 1 sentences out of 5000 average sentence time = 0.0121174597571
+	done 1001 sentences out of 5000 average sentence time = 3.67626895925e-05
+	done 2001 sentences out of 5000 average sentence time = 5.45874597407e-05
+	done 3001 sentences out of 5000 average sentence time = 7.36051604964e-06
+	done 4001 sentences out of 5000 average sentence time = 3.57101234622e-07
+iter = 46 average perceptron time = 346.702333922
+	done 1 sentences out of 5000 average sentence time = 0.0317047518947
+	done 1001 sentences out of 5000 average sentence time = 3.88628288054e-05
+	done 2001 sentences out of 5000 average sentence time = 5.51210542707e-05
+	done 3001 sentences out of 5000 average sentence time = 7.62698055229e-06
+	done 4001 sentences out of 5000 average sentence time = 3.29939509282e-07
+iter = 51 average perceptron time = 348.119494494
+	done 1 sentences out of 5000 average sentence time = 0.0120435010176
+	done 1001 sentences out of 5000 average sentence time = 3.68685409508e-05
+	done 2001 sentences out of 5000 average sentence time = 5.49882967972e-05
+	done 3001 sentences out of 5000 average sentence time = 7.43515427452e-06
+	done 4001 sentences out of 5000 average sentence time = 3.43822169163e-07
+iter = 56 average perceptron time = 348.839480751
+	done 1 sentences out of 5000 average sentence time = 0.0309062994129
+	done 1001 sentences out of 5000 average sentence time = 3.77913476712e-05
+	done 2001 sentences out of 5000 average sentence time = 5.68535393124e-05
+	done 3001 sentences out of 5000 average sentence time = 7.53423601779e-06
+	done 4001 sentences out of 5000 average sentence time = 3.66004244387e-07
+iter = 61 average perceptron time = 350.311503934
+	done 1 sentences out of 5000 average sentence time = 0.0125159313175
+	done 1001 sentences out of 5000 average sentence time = 3.61357238539e-05
+	done 2001 sentences out of 5000 average sentence time = 5.33789141406e-05
+	done 3001 sentences out of 5000 average sentence time = 7.41473438312e-06
+	done 4001 sentences out of 5000 average sentence time = 3.25638903687e-07
+iter = 66 average perceptron time = 350.42877706
+	done 1 sentences out of 5000 average sentence time = 0.0306485003894
+	done 1001 sentences out of 5000 average sentence time = 3.6785910546e-05
+	done 2001 sentences out of 5000 average sentence time = 5.52993716964e-05
+	done 3001 sentences out of 5000 average sentence time = 7.36635030389e-06
+	done 4001 sentences out of 5000 average sentence time = 3.64646158075e-07
+iter = 71 average perceptron time = 349.959515902
+	done 1 sentences out of 5000 average sentence time = 0.0120202568432
+	done 1001 sentences out of 5000 average sentence time = 3.55579141541e-05
+	done 2001 sentences out of 5000 average sentence time = 5.49867881887e-05
+	done 3001 sentences out of 5000 average sentence time = 7.71972508559e-06
+	done 4001 sentences out of 5000 average sentence time = 3.57553929756e-07
+iter = 76 average perceptron time = 349.478630251
+	done 1 sentences out of 5000 average sentence time = 0.0304226998378
+	done 1001 sentences out of 5000 average sentence time = 3.52376459401e-05
+	done 2001 sentences out of 5000 average sentence time = 5.41994458486e-05
+	done 3001 sentences out of 5000 average sentence time = 7.35498356579e-06
+	done 4001 sentences out of 5000 average sentence time = 3.55818597499e-07
+iter = 81 average perceptron time = 349.096582854
+	done 1 sentences out of 5000 average sentence time = 0.0130716783933
+	done 1001 sentences out of 5000 average sentence time = 3.65075606792e-05
+	done 2001 sentences out of 5000 average sentence time = 5.39950295102e-05
+	done 3001 sentences out of 5000 average sentence time = 7.46382259733e-06
+	done 4001 sentences out of 5000 average sentence time = 3.18244878612e-07
+iter = 86 average perceptron time = 348.743029672
+	done 1 sentences out of 5000 average sentence time = 0.0122388124582
+	done 1001 sentences out of 5000 average sentence time = 3.6614919887e-05
+	done 2001 sentences out of 5000 average sentence time = 5.44064268202e-05
+	done 3001 sentences out of 5000 average sentence time = 7.81649324526e-06
+	done 4001 sentences out of 5000 average sentence time = 3.57478480567e-07
+iter = 91 average perceptron time = 348.489867209
+	done 1 sentences out of 5000 average sentence time = 0.0117002721017
+	done 1001 sentences out of 5000 average sentence time = 3.62204652495e-05
+	done 2001 sentences out of 5000 average sentence time = 5.36993424087e-05
+	done 3001 sentences out of 5000 average sentence time = 7.85723243752e-06
+	done 4001 sentences out of 5000 average sentence time = 3.58383871745e-07
+iter = 96 average perceptron time = 348.269838808
+sumW = 0
+normW = 5736861.03636
+{0: 1, 1: 3, 2: 1, 3: 1, 4: 1, 5: 1, 8: 1, 9: 1, 11: 2, 12: 2, 13: 2, 16: 1, 17: 2, 18: 1, 21: 1, 22: 1, 23: 1, 26: 1, 27: 2, 28: 1, 31: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1, 38: 1, 41: 1, 42: 2, 43: 1, 46: 1, 47: 2, 48: 1, 51: 1, 52: 1, 53: 1, 56: 1, 57: 1, 59: 1, 60: 1, 62: 1, 63: 1, 65: 1, 66: 1, 68: 1, 69: 1, 71: 1, 72: 1, 73: 1, 77: 5, 79: 1, 80: 1, 82: 2, 83: 2, 85: 1, 88: 1, 89: 1, 104: 1, 107: 4, 108: 4, 171: 1, 172: 1, 173: 1, 179: 1, 180: 1, 202: 1, 203: 1, 204: 1, 212: 1, 213: 1, 233: 3, 234: 3, 235: 3, 237: 1, 238: 1, 249: 1, 250: 1, 262: 1, 263: 1, 264: 3, 265: 3, 266: 3, 268: 1, 284: 1, 285: 1, 286: 1, 287: 1, 291: 1, 326: 1, 327: 3, 328: 1, 339: 1, 344: 1, 345: 2, 350: 1, 351: 1, 357: 1, 358: 1, 359: 1, 378: 1, 383: 1, 392: 2, 393: 2, 394: 1, 395: 1}
+{0: 1, 1: 3, 2: 1, 3: 1, 47: 2, 5: 1, 65: 1, 8: 1, 9: 1, 11: 2, 396: 17, 141: 17, 143: 1, 16: 1, 17: 2, 18: 1, 147: 2, 148: 1, 149: 1, 22: 1, 23: 1, 152: 1, 153: 2, 26: 1, 27: 2, 28: 1, 154: 1, 150: 1, 31: 1, 32: 1, 33: 1, 162: 1, 155: 1, 36: 1, 37: 1, 38: 1, 167: 1, 156: 1, 42: 2, 43: 1, 46: 1, 157: 1, 48: 1, 51: 1, 52: 1, 158: 1, 73: 1, 56: 1, 57: 1, 159: 2, 151: 1, 13: 2, 62: 1, 53: 1, 160: 1, 66: 1, 68: 1, 69: 1, 70: 1, 161: 2, 72: 1, 12: 2, 397: 17, 163: 1, 164: 1, 71: 1, 165: 1, 144: 3, 59: 1, 166: 1, 145: 1, 60: 1, 146: 2, 41: 1, 20: 1, 169: 1, 63: 1, 170: 1, 4: 1, 21: 1}
+[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 0, 17]
+optVal = -680495
+[2, 8, 2, 5, 6, 2, 2, 0, 8, 11, 9, 9, 15, 15, 12, 9, 16, 8]
+goldVal = -692361
+loading model...
+time to load raw data = 3.65682150104
+[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 0, 17]
