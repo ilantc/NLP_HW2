@@ -24,7 +24,7 @@ class mstModel:
         self.featureNames = []
         self.allSentences = [] 
         self.featureDict = {'pWord': {}, 'pPos' : {}, 'cWord': {}, 'cPos': {},'pWordPPos':{},\
-                   'cWordCPos':{}, 'pPosCWordCPos':{}, 'pPosCPos':{}}
+                   'cWordCPos':{}, 'pPosCWordCPos':{},'pWordPPosCPos':{}, 'pPosCPos':{}}
         return
     
     def readFile(self,numSentences,offset = 0,inputFile = "../data/wsj_gold_dependency"):
@@ -92,26 +92,43 @@ class mstModel:
             self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)] = self.featureIndex
             self.featureNames.append("pPcWcP = " + pPos+","+cWord+","+cPos)
             self.featureIndex += 1
+        if not self.featureDict['pWordPPosCPos'].has_key((pWord,pPos,cPos)):
+            self.featureDict['pWordPPosCPos'][(pWord,pPos,cPos)] = self.featureIndex
+            self.featureNames.append("pWpPcP = " + pWord +"," + pPos+","+cPos)
+            self.featureIndex += 1
         if not self.featureDict['pPosCPos'].has_key((pPos,cPos)):
             self.featureDict['pPosCPos'][(pPos,cPos)] = self.featureIndex   
             self.featureNames.append("pPcP   = " + pPos+","+cPos) 
             self.featureIndex += 1   
-    
-    def buildFeatureMapping(self):
-#         featureIndex = 0
-        for sentence in self.allSentences:
-            for parentIndex in range(0,len(sentence.words) + 1):
-                pWord = sentence.words[parentIndex - 1]
-                pPos = sentence.poss[parentIndex - 1]
-                if parentIndex == 0:
-                    pWord = self.rootSymbol
-                    pPos = self.rootPOS
-                for childIndex in range(1,len(sentence.words) + 1):
-                    cWord = sentence.words[childIndex - 1] 
-                    cPos = sentence.poss[childIndex - 1]
+        
+    def buildFeatureMapping(self,oldFeatureSet=False):
+        if oldFeatureSet:
+            for sentence in self.allSentences:
+                for childIndex in range(0,len(sentence.words)):
+                    cWord = sentence.words[childIndex] 
+                    cPos = sentence.poss[childIndex]
+                    if sentence.goldHeads[childIndex] != 0:
+                        pWord = sentence.words[sentence.goldHeads[childIndex]-1]
+                        pPos = sentence.poss[sentence.goldHeads[childIndex]-1]
+                    else:
+                        pWord = self.rootSymbol
+                        pPos = self.rootPOS
                     self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
-        self.featuresNum = self.featureIndex
-    
+            self.featuresNum = self.featureIndex
+        else:
+            for sentence in self.allSentences:
+                for parentIndex in range(0,len(sentence.words) + 1):
+                    pWord = sentence.words[parentIndex - 1]
+                    pPos = sentence.poss[parentIndex - 1]
+                    if parentIndex == 0:
+                        pWord = self.rootSymbol
+                        pPos = self.rootPOS
+                    for childIndex in range(1,len(sentence.words) + 1):
+                        cWord = sentence.words[childIndex - 1] 
+                        cPos = sentence.poss[childIndex - 1]
+                        self.insertToFeaturesDicts(pWord, pPos, cWord, cPos)    
+            self.featuresNum = self.featureIndex
+        
     def getEdgeFeatureIndices(self,pWord, pPos, cWord, cPos):
         indices = []
         if self.featureDict['cWord'].has_key(cWord):
@@ -128,6 +145,8 @@ class mstModel:
             indices.append(self.featureDict['cWordCPos'][(cWord,cPos)])
         if self.featureDict['pPosCWordCPos'].has_key((pPos,cWord,cPos)):
             indices.append(self.featureDict['pPosCWordCPos'][(pPos,cWord,cPos)])
+        if self.featureDict['pWordPPosCPos'].has_key((pWord,pPos,cPos)):
+            indices.append(self.featureDict['pWordPPosCPos'][(pWord,pPos,cPos)])
         if self.featureDict['pPosCPos'].has_key((pPos,cPos)):
             indices.append(self.featureDict['pPosCPos'][(pPos,cPos)])
         return indices
@@ -398,6 +417,13 @@ class mstModel:
             
             line = {"sentenceIndex": sentenceIndex,"w_20": len(allCorrect_20),"w_50": len(allCorrect_50),\
                     "w_80": len(allCorrect_80),"w_100": len(allCorrect_100), "n": len(sentence.words)}
+            print "sentence", sentenceIndex , "out of" , len(sentences), ":"
+            print "gold Heads    =", sentence.goldHeads
+            print "opt Heads_20  =", optHeads_20
+            print "opt Heads_50  =", optHeads_50
+            print "opt Heads_80  =", optHeads_80
+            print "opt Heads_100 =", optHeads_100, "\n"
+            
             writer.writerow(line)
             sentenceIndex += 1
         
