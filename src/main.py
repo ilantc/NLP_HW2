@@ -21,6 +21,8 @@ def main():
     dependencyTreeModel.allSentences = dependencyTreeModel.readFile(numTrain,offset)
     dependencyTreeModel.buildFeatureMapping(useOldFeatureSet)    
     print "num features =",dependencyTreeModel.featuresNum
+    print "num tokens =", len(dependencyTreeModel.featureDict['cWord'])
+    print "num words =", sum(map(lambda s: len(s.words),dependencyTreeModel.allSentences))
     dependencyTreeModel.train(trainIterNum)
     dependencyTreeModel.save(modelFileName)
 #     print "sumW =", sum(dependencyTreeModel.w_f)

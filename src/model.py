@@ -170,7 +170,6 @@ class mstModel:
                 else:
                     featureVectorIndices[index] = 1
         return featureVectorIndices 
-    # TODO - Liora
     
     def calcEdgeWeight(self, pWord, pPos, cWord, cPos, w):
         try:
@@ -183,8 +182,6 @@ class mstModel:
             print err.args      
             print err
         return w_e
-    
-    # TODO - Liora
     
     def train(self,iterNum):
         self.perceptron(iterNum)
@@ -254,8 +251,6 @@ class mstModel:
                 G.add_edge(p, c, {'weight': w_e})
         
         return G
-    
-    # TODO - Ilan
     
     def contract(self,G,C_edges):
         C_nodes = [u for (u,_) in C_edges]
@@ -355,11 +350,8 @@ class mstModel:
         Gopt.add_edge(newNodeInEdgeU, newNodeInEdgeData['origV'], G.get_edge_data(newNodeInEdgeU, newNodeInEdgeData['origV']))
         
         # 5) if there was an outgoing edge from the contracted node, add it as well
-#         if len(newNodeOutEdge) > 0:
-#             Gopt.add_edge(newNodeOutEdgeData['origU'],newNodeOutEdgeV, G.get_edge_data(newNodeOutEdgeData['origU'],newNodeOutEdgeV))
         for edgeToAdd in edgesToAdd:
             Gopt.add_edge(edgeToAdd['data']['origU'], edgeToAdd['v'], G.get_edge_data(edgeToAdd['data']['origU'], edgeToAdd['v']))
-        
         
         return Gopt
     
